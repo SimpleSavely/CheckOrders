@@ -32,10 +32,13 @@ class Weblancer:
         return pages
 
     def parse(self):
+        print('Weblancer')
         orders = {}
         j = 0
-        while j < self.all_pages():
+        pages = self.all_pages()
+        while j < pages:
             j += 1
+            print(str(round((j/pages)*100))+'%')
             if j != 1:
                 url = self.url + '&page=' + str(j)
             else:
@@ -82,10 +85,13 @@ class Freelansim:
             return 1
 
     def parse(self):
+        print('Frilansim')
         orders = {}
         j = 0
-        while j < self.all_pages():
+        pages = self.all_pages()
+        while j < pages:
             j += 1
+            print(str(round((j/pages)*100))+'%')
             url = self.url_main+str(j)+self.url_key
             soup = make_soup(url)
             div = soup.find_all('div', class_ = 'task__title')
@@ -126,10 +132,13 @@ class Kwork:
         return max(pp)
 
     def parse(self):
+        print('Kwork')
         orders = {}
         j = 0
-        while j < self.all_pages():
+        pages = self.all_pages()
+        while j < pages:
             j += 1
+            print(str(round((j/pages)*100))+'%')
             url = self.url + str(j)
             soup = make_soup(url)
             div = soup.find_all('div', class_ = 'wants-card__header-title first-letter breakwords')
@@ -151,6 +160,51 @@ class Kwork:
         return orders
 
 
+class Freelance:
+    def __init__(self, url = 'https://freelance.ru/projects/filter/?specs=4:133:116:673:117&page='):
+       self.url = url
+
+    def all_pages(self):
+        soup = make_soup(self.url+'1')
+        ul = soup.find('ul', class_ = 'pagination pagination-default')
+        lis = ul.find_all('li')
+        L = []
+        for li in lis:
+            try:
+                li = int(li.text)
+                L.append(li)
+            except:
+                pass
+        return max(L)
+
+    def parse(self):
+        print('Freelance.ru')
+        orders = {}
+        j = 0
+        pages = self.all_pages()
+        while j < pages:
+            j += 1
+            print(str(round((j/pages)*100))+'%')
+            soup = make_soup(self.url+str(j))
+            divs = soup.find_all('div', class_ = 'proj')
+            for div in divs:
+                name = div.find('h2').get('title')
+                if name != 'Доступ для базовых аккаунтов закрыт заказчиком':
+                    name = name.split(':')[0]
+                    cost = div.find('span', class_ = 'cost').find('a').text
+                    time_li = div.find('li', class_ = 'proj-inf pdata pull-left').text
+                    time_m = time_li.split(' ')
+                    link = 'https://freelance.ru' + div.find('a', class_ = 'ptitle').get('href')
+                    if len(time_m) == 2:
+                        time = time_m[1]
+                    else:
+                        time = time_m[0]
+                words = name.split(' ')
+                for word in words:
+                    if word in keys:
+                        orders[(name,time)] = link
+        return orders
+
 def main():
     with open('List.txt', 'a') as List:
         List.write(str(datetime.now())+'\n')
@@ -162,7 +216,7 @@ def main():
             previous_orders.append(order)
     List.close()
 
-    orders = {**Weblancer().parse(), **Freelansim().parse(), **Kwork().parse()}
+    orders = {**Weblancer().parse(), **Freelansim().parse(), **Kwork().parse(), **Freelance().parse()}
 
     i = 0
     with open('List.txt', 'a') as List:
@@ -178,6 +232,8 @@ def main():
 
     if i == 0:
         print('Новых заказов нет')
+    else:
+        print('Найдено',len(orders),'новых заказов')
 
 
 if __name__ == "__main__":
