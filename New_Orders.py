@@ -190,7 +190,7 @@ class Freelance:
             for div in divs:
                 name = div.find('h2').get('title')
                 if name != 'Доступ для базовых аккаунтов закрыт заказчиком':
-                    name = name.split(' ')[0]
+                    name = name.split(':')[0]
                     cost = div.find('span', class_ = 'cost').find('a').text
                     time_li = div.find('li', class_ = 'proj-inf pdata pull-left').text
                     time_m = time_li.split(' ')
