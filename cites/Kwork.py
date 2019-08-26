@@ -17,7 +17,7 @@ class Kwork:
         headers = {"User-Agent":"Mozilla/5.0"}
         html = requests.get(self.url+'1', headers=headers).text
         soup = BeautifulSoup(html, 'lxml')
-
+        
         p = soup.find('div', class_ = 'p1')
         smth = p.find_all('a')
         pp = []
